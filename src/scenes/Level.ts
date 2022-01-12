@@ -15,20 +15,25 @@ class Level extends Phaser.Scene {
 
 	editorCreate(): void {
 
-		// dino
-		const dino = this.add.image(400, 245.50984430371858, "dino");
+		// ball
+		const ball = this.add.image(423, 536, "ball");
 
-		// text_1
-		const text_1 = this.add.text(400, 406, "", {});
-		text_1.setOrigin(0.5, 0);
-		text_1.text = "Phaser 3 + Phaser Editor 2D + TypeScript";
-		text_1.setStyle({"fontFamily":"arial","fontSize":"3em"});
+		// paddle
+		const paddle = this.add.image(422, 579, "paddle");
 
-		// dino (components)
-		new PushOnClick(dino);
+		// ball (components)
+		new BallComponent(ball);
+
+		// paddle (components)
+		const paddlePaddleComponent = new PaddleComponent(paddle);
+		paddlePaddleComponent.ball = ball;
+
+		this.ball = ball;
 
 		this.events.emit("scene-awake");
 	}
+
+	private ball: Phaser.GameObjects.Image | undefined;
 
 	/* START-USER-CODE */
 
@@ -37,6 +42,25 @@ class Level extends Phaser.Scene {
 	create() {
 
 		this.editorCreate();
+		this.createBricks();
+	}
+
+	createBricks() {
+		const brickPic = this.add.image(400, 400, "brick");
+		const colors = [0xff0000, 0x00ff00, 0x0000ff, 0xffffff, 0xffff00, 0xff00ff, 0x00ffff]
+		let count = 0
+		for (let column = 0; column < 10; column++) {
+			for (let row = 0; row < 5; row++ ) {
+				count++
+				const brick = this.physics.add.image(column * brickPic.displayWidth, row * brickPic.height, "brick");
+				brick.setImmovable()
+				brick.setTint(colors[count % colors.length])
+				this.physics.add.collider(brick, this.ball!, () => { 
+					brick.destroy()
+				})
+			}
+		}
+		brickPic.destroy()
 	}
 
 	/* END-USER-CODE */

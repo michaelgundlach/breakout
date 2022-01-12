@@ -8,6 +8,13 @@ window.addEventListener('load', function () {
         scale: {
             mode: Phaser.Scale.FIT,
             autoCenter: Phaser.Scale.CENTER_BOTH
+        },
+        physics: {
+            default: 'arcade',
+            arcade: {
+                checkCollision: { up: true, left: true, right: true, down: false },
+                debug: false,
+            }
         }
     });
     game.scene.add("Preload", Preload);
@@ -65,6 +72,70 @@ class UserComponent {
         // override this
     }
 }
+// You can write more code here
+/// <reference path="./UserComponent.ts" />
+/* START OF COMPILED CODE */
+class BallComponent extends UserComponent {
+    constructor(gameObject) {
+        super(gameObject);
+        this.gameObject = gameObject;
+        gameObject["__BallComponent"] = this;
+        /* START-USER-CTR-CODE */
+        gameObject.scene.physics.add.existing(gameObject);
+        const body = gameObject.body;
+        body.collideWorldBounds = true;
+        body.setBounce(1, 1);
+        body.setVelocity(200, 400);
+        // Write your code here.
+        /* END-USER-CTR-CODE */
+    }
+    static getComponent(gameObject) {
+        return gameObject["__BallComponent"];
+    }
+    gameObject;
+}
+/* END OF COMPILED CODE */
+// You can write more code here
+// You can write more code here
+/// <reference path="./UserComponent.ts" />
+/* START OF COMPILED CODE */
+class PaddleComponent extends UserComponent {
+    constructor(gameObject) {
+        super(gameObject);
+        this.gameObject = gameObject;
+        gameObject["__PaddleComponent"] = this;
+        /* START-USER-CTR-CODE */
+        gameObject.scene.physics.add.existing(gameObject);
+        gameObject.body.immovable = true;
+        // Write your code here.
+        /* END-USER-CTR-CODE */
+    }
+    static getComponent(gameObject) {
+        return gameObject["__PaddleComponent"];
+    }
+    gameObject;
+    ball;
+    /* START-USER-CODE */
+    // Write your code here.
+    awake() {
+        this.gameObject.scene.physics.add.collider(this.ball, this.gameObject, this.hitBall, undefined, this);
+    }
+    update() {
+        const input = this.gameObject.scene.input;
+        input.on('pointermove', () => {
+            this.gameObject.x = input.activePointer.x;
+        });
+    }
+    hitBall(ball, gameObject) {
+        // How far from our center were we hit?
+        const offset = ball.x - gameObject.x;
+        ball.body.velocity.x = offset * 10;
+        const Between = () => Phaser.Math.Between(0, 0xffffff);
+        this.gameObject.setTint(Between(), Between(), Between(), Between());
+    }
+}
+/* END OF COMPILED CODE */
+// You can write more code here
 /// <reference path="./UserComponent.ts"/>
 /* START OF COMPILED CODE */
 class PreloadText extends UserComponent {
@@ -74,7 +145,7 @@ class PreloadText extends UserComponent {
         gameObject["__PreloadText"] = this;
         /* START-USER-CTR-CODE */
         this.scene.load.on(Phaser.Loader.Events.PROGRESS, (p) => {
-            this.gameObject.text = (p * 100) + "%";
+            this.gameObject.text = Math.floor(p * 100) + "%";
         });
         /* END-USER-CTR-CODE */
     }
@@ -126,21 +197,41 @@ class Level extends Phaser.Scene {
         /* END-USER-CTR-CODE */
     }
     editorCreate() {
-        // dino
-        const dino = this.add.image(400, 245.50984430371858, "dino");
-        // text_1
-        const text_1 = this.add.text(400, 406, "", {});
-        text_1.setOrigin(0.5, 0);
-        text_1.text = "Phaser 3 + Phaser Editor 2D + TypeScript";
-        text_1.setStyle({ "fontFamily": "arial", "fontSize": "3em" });
-        // dino (components)
-        new PushOnClick(dino);
+        // ball
+        const ball = this.add.image(423, 536, "ball");
+        // paddle
+        const paddle = this.add.image(422, 579, "paddle");
+        // ball (components)
+        new BallComponent(ball);
+        // paddle (components)
+        const paddlePaddleComponent = new PaddleComponent(paddle);
+        paddlePaddleComponent.ball = ball;
+        this.ball = ball;
         this.events.emit("scene-awake");
     }
+    ball;
     /* START-USER-CODE */
     // Write your code here.
     create() {
         this.editorCreate();
+        this.createBricks();
+    }
+    createBricks() {
+        const brickPic = this.add.image(400, 400, "brick");
+        const colors = [0xff0000, 0x00ff00, 0x0000ff, 0xffffff, 0xffff00, 0xff00ff, 0x00ffff];
+        let count = 0;
+        for (let column = 0; column < 10; column++) {
+            for (let row = 0; row < 5; row++) {
+                count++;
+                const brick = this.physics.add.image(column * brickPic.displayWidth, row * brickPic.height, "brick");
+                brick.setImmovable();
+                brick.setTint(colors[count % colors.length]);
+                this.physics.add.collider(brick, this.ball, () => {
+                    brick.destroy();
+                });
+            }
+        }
+        brickPic.destroy();
     }
 }
 /* END OF COMPILED CODE */
@@ -158,12 +249,9 @@ class Preload extends Phaser.Scene {
         this.load.pack("asset-pack", "assets/asset-pack.json");
     }
     editorCreate() {
-        // guapen
-        const guapen = this.add.image(400, 219, "guapen");
-        guapen.scaleX = 0.5915891440784282;
-        guapen.scaleY = 0.5915891440784282;
         // progress
-        const progress = this.add.text(381.5, 335, "", {});
+        const progress = this.add.text(400, 349, "", {});
+        progress.setOrigin(0.5, 0.5);
         progress.text = "0%";
         progress.setStyle({ "fontSize": "30px" });
         // progress (components)

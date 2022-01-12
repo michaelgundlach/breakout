@@ -11,6 +11,30 @@
             "baseClass": "UserComponent",
             "gameObjectType": "Phaser.GameObjects.Text",
             "properties": []
+        },
+        {
+            "name": "BallComponent",
+            "baseClass": "UserComponent",
+            "gameObjectType": "Phaser.GameObjects.Image",
+            "properties": []
+        },
+        {
+            "name": "PaddleComponent",
+            "baseClass": "UserComponent",
+            "gameObjectType": "Phaser.GameObjects.Image",
+            "properties": [
+                {
+                    "name": "ball",
+                    "label": "Property 1",
+                    "tooltip": "Property 1",
+                    "defValue": "",
+                    "customDefinition": false,
+                    "type": {
+                        "id": "expression",
+                        "expressionType": "any"
+                    }
+                }
+            ]
         }
     ],
     "meta": {

@@ -9,6 +9,13 @@ window.addEventListener('load', function () {
 		scale: {
 			mode: Phaser.Scale.FIT,
 			autoCenter: Phaser.Scale.CENTER_BOTH
+		},
+		physics: {
+			default: 'arcade',
+			arcade: {
+				checkCollision: { up: true, left: true, right: true, down: false },
+				debug: false,
+			}
 		}
 	});
 

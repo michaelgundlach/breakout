@@ -26,6 +26,11 @@ class PreloadText extends UserComponent {
 
 	private gameObject: Phaser.GameObjects.Text;
 
+	/* START-USER-CODE */
+
+	// Write your code here.
+
+	/* END-USER-CODE */
 }
 
 /* END OF COMPILED CODE */
